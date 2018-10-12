@@ -1,5 +1,9 @@
 # Author: James Haller
 
+"""
+Uses Gang-of-Four State pattern to retrieve DES keys **in order**.
+"""
+
 PC1 = [57, 49, 41, 33, 25, 17,  9,  1,
        58, 50, 42, 34, 26, 18, 10,  2,
        59, 51, 43, 35, 27, 19, 11,  3,
@@ -19,6 +23,9 @@ SINGLE_BIT_SHIFT_ROUNDS = [1, 2, 9, 16]
 
 
 class KeyScheduler:
+    """
+    GoF Context class.
+    """
     __slots__ = ['_original_key', '_key', '_round']
 
     def __init__(self, key):
@@ -29,3 +36,19 @@ class KeyScheduler:
 
     def get_key(self):
         return self._key
+
+
+"""=============================================================================="""
+
+
+class Round:
+    """
+    GoF State super-class.
+    """
+    __slots__ = ['_scheduler']
+
+    def __init__(self, scheduler):
+        self._scheduler = scheduler
+
+    def run(self):
+        raise NotImplementedError
