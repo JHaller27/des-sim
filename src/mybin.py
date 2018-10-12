@@ -27,6 +27,26 @@ class Bin:
         x = self._val << shift_amt
         return Bin(target, x)
 
+    def extend(self, other: 'Bin'):
+        """
+        Concatenate another Bin onto the end of this one
+        :param other: Bin object for concatenation
+        :return: This Bin with other Bin concatenated to right side
+        """
+        return Bin(len(self) + len(other), str(self) + str(other), 2)
+
+    def split(self, num: int):
+        """
+        Split this Bin into evenly-sized chunks
+        :param num: Number of chunks to divide into
+        :return: List of Bin objects of even length
+        """
+        assert len(self) % num == 0
+
+        num_str = str(self)
+        offset = len(self) // num
+        return [Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num)]
+
     def __init__(self, num_digits, val=0, base=2):
         if isinstance(num_digits, Bin):
             self._num_digits = num_digits._num_digits
