@@ -1,4 +1,5 @@
 # Author: James Haller
+from typing import Union
 
 
 class Bin:
@@ -47,7 +48,7 @@ class Bin:
         offset = len(self) // num
         return [Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num)]
 
-    def __init__(self, num_digits, val=0, base=2):
+    def __init__(self, num_digits: Union[int, 'Bin'], val: Union[int, str]=0, base: int=2):
         if isinstance(num_digits, Bin):
             self._num_digits = num_digits._num_digits
             self._val = num_digits._val
