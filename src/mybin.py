@@ -7,6 +7,26 @@ class Bin:
     def copy(self):
         return Bin(self._num_digits, self._val)
 
+    def ltrim(self, target):
+        """
+        Trim from left side by right-shifting (and dropping digits)
+        :param target: Target number of digits
+        :return: Shifted Bin object
+        """
+        shift_amt = self._num_digits - target
+        x = self._val >> shift_amt
+        return Bin(target, x)
+
+    def rtrim(self, target):
+        """
+        Trim from right side by left-shifting (and dropping digits)
+        :param target: Target number of digits
+        :return: Shifted Bin object
+        """
+        shift_amt = self._num_digits - target
+        x = self._val << shift_amt
+        return Bin(target, x)
+
     def __init__(self, num_digits, val=0, base=2):
         if isinstance(num_digits, Bin):
             self._num_digits = num_digits._num_digits
