@@ -60,3 +60,6 @@ class Bin:
             return self << -other
         else:
             return self
+
+    def __len__(self):
+        return self._num_digits
