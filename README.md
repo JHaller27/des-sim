@@ -1,2 +1,2 @@
-# des-sim
+# DES-sim
 Python DES simulation
