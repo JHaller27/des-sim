@@ -28,25 +28,17 @@ class Bin:
         x = self._val << shift_amt
         return Bin(target, x)
 
-    def extend(self, other: 'Bin'):
-        """
-        Concatenate another Bin onto the end of this one
-        :param other: Bin object for concatenation
-        :return: This Bin with other Bin concatenated to right side
-        """
-        return Bin(len(self) + len(other), str(self) + str(other), 2)
-
     def split(self, num: int):
         """
         Split this Bin into evenly-sized chunks
         :param num: Number of chunks to divide into
-        :return: Tuple of Bin objects of even length
+        :return: List of Bin objects of even length
         """
         assert len(self) % num == 0
 
         num_str = str(self)
         offset = len(self) // num
-        return tuple(Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num))
+        return [Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num)]
 
     def __init__(self, num_digits: Union[int, 'Bin'], val: Union[int, str]=0, base: int=2):
         if isinstance(num_digits, Bin):
@@ -62,6 +54,14 @@ class Bin:
 
             if not 1 <= self._num_digits <= len(str(self)):
                 raise ValueError('number of digits must be between 1 and the number of binary digits in val')
+
+    def __add__(self, other: 'Bin'):
+        """
+        Concatenate another Bin onto the end of this one
+        :param other: Bin object for concatenation
+        :return: This Bin with other Bin concatenated to right side
+        """
+        return Bin(len(self) + len(other), str(self) + str(other), 2)
 
     def __xor__(self, other):
         if isinstance(other, Bin):
@@ -81,7 +81,7 @@ class Bin:
                 x <<= 1
                 if x >= 2 ** self._num_digits - 1:
                     x -= 2 ** self._num_digits - 1
-            return Bin(x, self._num_digits)
+            return Bin(self._num_digits, x)
         elif other < 0:
             return self >> -other
         else:
@@ -109,4 +109,4 @@ class Bin:
         return [int(x) for x in str(self)]
 
     def __getitem__(self, index):
-        return int(str(self)[index])
+        return str(self)[index]

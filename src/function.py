@@ -1,5 +1,4 @@
 # Author: James Haller
-from encrypter import Encrypter, R
 from mybin import Bin
 
 E = \
@@ -92,7 +91,7 @@ class Function:
 
     __slots__ = ['_encrypter', '_step', 'data', '_key']
 
-    def __init__(self, encrypter: Encrypter):
+    def __init__(self, encrypter: 'Encrypter'):
         self._encrypter = encrypter
         self._step = None
         self.data = None
@@ -107,7 +106,7 @@ class Function:
         return self.data
 
     def set_new_data(self):
-        self.data = self._encrypter.plaintext[R]
+        self.data = self._encrypter.plaintext[1]
 
     def set_new_key(self):
         self._key = self._encrypter.get_key()
@@ -154,7 +153,7 @@ class Expansion(FunctionStep):
         s = ''
         for new_bit_loc in range(self.OUTPUT_LEN):
             old_bit_loc = E[new_bit_loc]
-            s += self._context.data[old_bit_loc - 1]  # Must subtract 1 b/c PC tables are 1-indexed
+            s += str(self._context.data[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
         self._context.data = Bin(self.OUTPUT_LEN, s, 2)
 
         return Xor(self._context)
@@ -176,12 +175,12 @@ class SBoxes(FunctionStep):
     OUTPUT_LEN = 4
 
     def run(self):
-        data_lst = list(self._context.data)
+        data_lst = self._context.data
         for s_box_idx in range(len(S_BOXES)):
             s_box = S_BOXES[s_box_idx]
             data = data_lst[s_box_idx]
 
-            row_idx = int(data[0] + data[len(data)], 2)
+            row_idx = int(data[0] + data[len(data) - 1], 2)
             col_idx = int(data[1:len(data) - 1], 2)
 
             data_lst[s_box_idx] = Bin(self.OUTPUT_LEN, s_box[row_idx][col_idx])
@@ -212,3 +211,6 @@ class Permutation(FunctionStep):
         self._context.data = Bin(self.OUTPUT_LEN, s, 2)
 
         return None
+
+
+from encrypter import *

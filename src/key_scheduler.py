@@ -44,7 +44,7 @@ class KeyScheduler:
 
     def _transform(self):
         while self._step is not None:
-            self._step = self._step.get_result()
+            self._step = self._step.run()
 
     def _get_round_num(self):
         return self._round_num
@@ -83,7 +83,7 @@ class Initialization(RoundStep):
         s = ''
         for new_bit_loc in range(self.KEY_OUTPUT_LEN):
             old_bit_loc = PC1[new_bit_loc]
-            s += self._scheduler.key[old_bit_loc - 1]  # Must subtract 1 b/c PC tables are 1-indexed
+            s += str(self._scheduler.key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
         self._scheduler.C, self._scheduler.D = Bin(self.KEY_OUTPUT_LEN, s, 2).split(2)
 
         return None
@@ -116,12 +116,12 @@ class Permute(RoundStep):
         assert isinstance(self._scheduler.C, Bin)
         assert isinstance(self._scheduler.D, Bin)
 
-        key = self._scheduler.C.extend(self._scheduler.D)
+        key = self._scheduler.C + self._scheduler.D
 
         s = ''
         for new_bit_loc in range(self.KEY_OUTPUT_LEN):
             old_bit_loc = PC2[new_bit_loc]
-            s += self._scheduler.key[old_bit_loc - 1]  # Must subtract 1 b/c PC tables are 1-indexed
+            s += str(self._scheduler.key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
 
         self._scheduler.key = key
 

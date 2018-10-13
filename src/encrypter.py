@@ -85,6 +85,7 @@ class Encrypter:
             self.run()
 
         self._step = BeginEnd(self)
+        self.run()
 
     def run(self):
         while self._step is not None:
@@ -119,7 +120,7 @@ class InitialPermutation(RoundStep):
         s = ''
         for new_bit_loc in range(self.OUTPUT_LEN):
             old_bit_loc = IP[new_bit_loc]
-            s += self._encrypter.plaintext[old_bit_loc - 1]  # Must subtract 1 b/c IP tables are 1-indexed
+            s += str(self._encrypter.plaintext[old_bit_loc - 1])  # Must subtract 1 b/c IP tables are 1-indexed
         self._encrypter.plaintext = Bin(self.OUTPUT_LEN, s, 2).split(2)
 
         return None
@@ -176,6 +177,6 @@ class FinalPermutation(RoundStep):
         for new_bit_loc in range(self.OUTPUT_LEN):
             old_bit_loc = IP_INV[new_bit_loc]
             s += self._encrypter.plaintext[old_bit_loc - 1]  # Must subtract 1 b/c IP tables are 1-indexed
-        self._encrypter.plaintext = Bin(self.OUTPUT_LEN, s, 2)
+        self._encrypter.ciphertext = Bin(self.OUTPUT_LEN, s, 2)
 
         return None
