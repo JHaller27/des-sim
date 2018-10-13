@@ -1,5 +1,5 @@
 # Author: James Haller
-
+from function import Function
 from key_scheduler import KeyScheduler
 from mybin import Bin
 
@@ -27,13 +27,15 @@ IP_INV = \
 
 
 class Encrypter:
-    __slots__ = ['plaintext', 'ciphertext', '_key_scheduler', '_step']
+    __slots__ = ['plaintext', 'ciphertext', 'f', '_key_scheduler', '_step']
 
     BLOCKSIZE = 64
+    NUM_ROUNDS = 16
 
     def __init__(self, key_scheduler: KeyScheduler):
         self.plaintext = None
         self.ciphertext = None
+        self.f = Function(self)
         self._key_scheduler = key_scheduler
         self._step = None
 
@@ -74,8 +76,17 @@ class Encrypter:
 
     def _encrypt_one(self, blk: Bin):
         self.plaintext = blk
-        self._step = Initialize(self)
 
+        self._step = Initialize(self)
+        self.run()
+
+        for round_num in range(self.NUM_ROUNDS):
+            self._step = StartRound(self)
+            self.run()
+
+        self._step = BeginEnd(self)
+
+    def run(self):
         while self._step is not None:
             self._step = self._step.run()
 
@@ -110,5 +121,61 @@ class InitialPermutation(RoundStep):
             old_bit_loc = IP[new_bit_loc]
             s += self._encrypter.plaintext[old_bit_loc - 1]  # Must subtract 1 b/c IP tables are 1-indexed
         self._encrypter.plaintext = Bin(self.KEY_OUTPUT_LEN, s, 2).split(2)
+
+        return None
+
+
+"""=============================================================================="""
+
+
+class StartRound(RoundStep):
+    def run(self):
+        return Xor(self._encrypter)
+
+
+class Xor(RoundStep):
+    def run(self):
+        f_result = self._encrypter.f.get_result()
+        self._encrypter.plaintext[L] ^= f_result
+        return SwapSides(self._encrypter)
+
+
+class SwapSides(RoundStep):
+    def run(self):
+        self._encrypter.plaintext[L], self._encrypter.plaintext[R] = \
+            self._encrypter.plaintext[R], self._encrypter.plaintext[L]
+        return None
+
+
+"""=============================================================================="""
+
+
+class BeginEnd(RoundStep):
+    def run(self):
+        return LastSwap(self._encrypter)
+
+
+class LastSwap(RoundStep):
+    def run(self):
+        self._encrypter.plaintext[L], self._encrypter.plaintext[R] = \
+            self._encrypter.plaintext[R], self._encrypter.plaintext[L]
+        return Recombine(self._encrypter)
+
+
+class Recombine(RoundStep):
+    def run(self):
+        self._encrypter.plaintext = self._encrypter.plaintext[L] + self._encrypter.plaintext[R]
+        return FinalPermutation(self._encrypter)
+
+
+class FinalPermutation(RoundStep):
+    KEY_OUTPUT_LEN = 64
+
+    def run(self):
+        s = ''
+        for new_bit_loc in range(self.KEY_OUTPUT_LEN):
+            old_bit_loc = IP_INV[new_bit_loc]
+            s += self._encrypter.plaintext[old_bit_loc - 1]  # Must subtract 1 b/c IP tables are 1-indexed
+        self._encrypter.plaintext = Bin(self.KEY_OUTPUT_LEN, s, 2)
 
         return None

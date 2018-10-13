@@ -44,7 +44,7 @@ class KeyScheduler:
 
     def _transform(self):
         while self._step is not None:
-            self._step = self._step.run()
+            self._step = self._step.get_result()
 
     def _get_round_num(self):
         return self._round_num

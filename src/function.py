@@ -13,7 +13,7 @@ class Function:
         self._step = None
         self._data = None
 
-    def run(self):
+    def get_result(self):
         self._data = self._encrypter.plaintext[R]
         self._step = Initialize(self)
 
