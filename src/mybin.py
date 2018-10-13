@@ -104,3 +104,9 @@ class Bin:
 
     def __len__(self):
         return self._num_digits
+
+    def __iter__(self):
+        return [int(x) for x in str(self)]
+
+    def __getitem__(self, index):
+        return int(str(self)[index])
