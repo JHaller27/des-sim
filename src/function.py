@@ -14,7 +14,6 @@ class Function:
         self._data = None
 
     def get_result(self):
-        self._data = self._encrypter.plaintext[R]
         self._step = Initialize(self)
 
         while self._step is not None:
@@ -38,7 +37,31 @@ class FunctionStep:
     def run(self):
         raise NotImplementedError
 
+    def _get_encrypter(self):
+        return self._context._encrypter
+
 
 class Initialize(FunctionStep):
+    def run(self):
+        self._context._data = self._context._encrypter.plaintext[R]  # Violates Law of Demeter, but eh
+        return Expansion(self._context)
+
+
+class Expansion(FunctionStep):
+    def run(self):
+        return None
+
+
+class Xor(FunctionStep):
+    def run(self):
+        return None
+
+
+class SBoxes(FunctionStep):
+    def run(self):
+        return None
+
+
+class Permutation(FunctionStep):
     def run(self):
         return None
