@@ -3,6 +3,7 @@
 """
 Uses Gang-of-Four State pattern to retrieve DES keys **in order**.
 """
+from mybin import Bin
 
 PC1 = [57, 49, 41, 33, 25, 17,  9,  1,
        58, 50, 42, 34, 26, 18, 10,  2,
@@ -26,22 +27,32 @@ class KeyScheduler:
     """
     GoF Context class.
     """
-    __slots__ = ['_original_key', '_key', '_round']
+    __slots__ = ['_original_key', '_step', 'key', 'C', 'D']
 
     def __init__(self, key):
-        self._original_key = key
+        if not isinstance(key, Bin):
+            key = Bin(64, key)
 
-        self._key = self._original_key
-        self._round = None
+        assert len(key) == 64
+        self._original_key = key
+        self.key = self._original_key
+
+        self._step = Initialization(self)
+        self._transform()  # Run Initialization step
+
+    def _transform(self):
+        while self._step is not None:
+            self._step = self._step.run()
 
     def get_key(self):
-        return self._key
+        self._transform()
+        return self.key
 
 
 """=============================================================================="""
 
 
-class Round:
+class RoundStep:
     """
     GoF State super-class.
     """
@@ -52,3 +63,16 @@ class Round:
 
     def run(self):
         raise NotImplementedError
+
+
+class Initialization(RoundStep):
+    KEY_OUTPUT_LEN = 56
+
+    def run(self):
+        s = ''
+        for new_bit_loc in range(self.KEY_OUTPUT_LEN):
+            old_bit_loc = PC1[new_bit_loc]
+            s += self._scheduler.key[old_bit_loc - 1]  # Must subtract 1 b/c PC tables are 1-indexed
+        self._scheduler.C, self._scheduler.D = Bin(self.KEY_OUTPUT_LEN, s, 2).split(2)
+
+        return None

@@ -40,13 +40,13 @@ class Bin:
         """
         Split this Bin into evenly-sized chunks
         :param num: Number of chunks to divide into
-        :return: List of Bin objects of even length
+        :return: Tuple of Bin objects of even length
         """
         assert len(self) % num == 0
 
         num_str = str(self)
         offset = len(self) // num
-        return [Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num)]
+        return tuple(Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num))
 
     def __init__(self, num_digits: Union[int, 'Bin'], val: Union[int, str]=0, base: int=2):
         if isinstance(num_digits, Bin):
