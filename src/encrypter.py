@@ -113,14 +113,14 @@ class Initialize(RoundStep):
 
 
 class InitialPermutation(RoundStep):
-    KEY_OUTPUT_LEN = 64
+    OUTPUT_LEN = 64
 
     def run(self):
         s = ''
-        for new_bit_loc in range(self.KEY_OUTPUT_LEN):
+        for new_bit_loc in range(self.OUTPUT_LEN):
             old_bit_loc = IP[new_bit_loc]
             s += self._encrypter.plaintext[old_bit_loc - 1]  # Must subtract 1 b/c IP tables are 1-indexed
-        self._encrypter.plaintext = Bin(self.KEY_OUTPUT_LEN, s, 2).split(2)
+        self._encrypter.plaintext = Bin(self.OUTPUT_LEN, s, 2).split(2)
 
         return None
 
@@ -169,13 +169,13 @@ class Recombine(RoundStep):
 
 
 class FinalPermutation(RoundStep):
-    KEY_OUTPUT_LEN = 64
+    OUTPUT_LEN = 64
 
     def run(self):
         s = ''
-        for new_bit_loc in range(self.KEY_OUTPUT_LEN):
+        for new_bit_loc in range(self.OUTPUT_LEN):
             old_bit_loc = IP_INV[new_bit_loc]
             s += self._encrypter.plaintext[old_bit_loc - 1]  # Must subtract 1 b/c IP tables are 1-indexed
-        self._encrypter.plaintext = Bin(self.KEY_OUTPUT_LEN, s, 2)
+        self._encrypter.plaintext = Bin(self.OUTPUT_LEN, s, 2)
 
         return None
