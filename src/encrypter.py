@@ -3,6 +3,28 @@
 from key_scheduler import KeyScheduler
 from mybin import Bin
 
+L, R = 0, 1
+
+IP = \
+    [58, 50, 42, 34, 26, 18, 10, 2,
+     60, 52, 44, 36, 28, 20, 12, 4,
+     62, 54, 46, 38, 30, 22, 14, 6,
+     64, 56, 48, 40, 32, 24, 16, 8,
+     57, 49, 41, 33, 25, 17, 9, 1,
+     59, 51, 43, 35, 27, 19, 11, 3,
+     61, 53, 45, 37, 29, 21, 13, 5,
+     63, 55, 47, 39, 31, 23, 15, 7]
+
+IP_INV = \
+    [40, 8, 48, 16, 56, 24, 64, 32,
+     39, 7, 47, 15, 55, 23, 63, 31,
+     38, 6, 46, 14, 54, 22, 62, 30,
+     37, 5, 45, 13, 53, 21, 61, 29,
+     36, 4, 44, 12, 52, 20, 60, 28,
+     35, 3, 43, 11, 51, 19, 59, 27,
+     34, 2, 42, 10, 50, 18, 58, 26,
+     33, 1, 41, 9, 49, 17, 57, 25]
+
 
 class Encrypter:
     __slots__ = ['plaintext', 'ciphertext', '_key_scheduler', '_step']
@@ -34,7 +56,7 @@ class Encrypter:
         num_blocks = ceil(len(plaintext) / self.BLOCKSIZE)
 
         for i in range(num_blocks):
-            blk = plaintext[i * self.BLOCKSIZE:(i+1) * self.BLOCKSIZE]
+            blk = plaintext[i * self.BLOCKSIZE:(i + 1) * self.BLOCKSIZE]
 
             # Pad out to BLOCKSIZE
             while len(blk) < self.BLOCKSIZE:
@@ -76,4 +98,17 @@ class RoundStep:
 
 class Initialize(RoundStep):
     def run(self):
+        return InitialPermutation(self._encrypter)
+
+
+class InitialPermutation(RoundStep):
+    KEY_OUTPUT_LEN = 64
+
+    def run(self):
+        s = ''
+        for new_bit_loc in range(self.KEY_OUTPUT_LEN):
+            old_bit_loc = IP[new_bit_loc]
+            s += self._encrypter.plaintext[old_bit_loc - 1]  # Must subtract 1 b/c IP tables are 1-indexed
+        self._encrypter.plaintext = Bin(self.KEY_OUTPUT_LEN, s, 2).split(2)
+
         return None
