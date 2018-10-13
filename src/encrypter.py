@@ -5,7 +5,7 @@ from mybin import Bin
 
 
 class Encrypter:
-    __slots__ = ['plaintext', 'ciphertext', '_key_scheduler']
+    __slots__ = ['plaintext', 'ciphertext', '_key_scheduler', '_step']
 
     BLOCKSIZE = 64
 
@@ -13,6 +13,7 @@ class Encrypter:
         self.plaintext = None
         self.ciphertext = None
         self._key_scheduler = key_scheduler
+        self._step = None
 
     def get_key(self):
         return self._key_scheduler.get_key()
@@ -42,11 +43,37 @@ class Encrypter:
             blk_lst.append(Bin(self.BLOCKSIZE, blk, 2))
 
         # Encrypt each block
+        result_ciphertext = None
         for blk in blk_lst:
             self._encrypt_one(blk)
+            result_ciphertext = self.ciphertext if result_ciphertext is None else result_ciphertext + self.ciphertext
 
-        return str(self.ciphertext)
+        return str(result_ciphertext)
 
-    def _encrypt_one(self, blk):
+    def _encrypt_one(self, blk: Bin):
         self.plaintext = blk
-        self.ciphertext = self.plaintext if self.ciphertext is None else self.ciphertext + self.plaintext
+        self._step = Initialize(self)
+
+        while self._step is not None:
+            self._step = self._step.run()
+
+
+"""=============================================================================="""
+
+
+class RoundStep:
+    """
+    GoF State super-class.
+    """
+    __slots__ = ['_encrypter']
+
+    def __init__(self, encrypter: Encrypter):
+        self._encrypter = encrypter
+
+    def run(self):
+        raise NotImplementedError
+
+
+class Initialize(RoundStep):
+    def run(self):
+        return None
