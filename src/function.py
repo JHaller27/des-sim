@@ -14,7 +14,7 @@ class Function:
         self._data = None
 
     def run(self):
-        self._data = self._encrypter.plaintext(R)
+        self._data = self._encrypter.plaintext[R]
         self._step = Initialize(self)
 
         while self._step is not None:
