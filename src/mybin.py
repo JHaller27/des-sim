@@ -60,8 +60,8 @@ class Bin:
             else:
                 self._val = int(val)
 
-            if num_digits < 1:
-                raise ValueError('number of digits must be >= 1')
+            if not 1 <= self._num_digits <= len(str(self)):
+                raise ValueError('number of digits must be between 1 and the number of binary digits in val')
 
     def __xor__(self, other):
         if isinstance(other, Bin):
