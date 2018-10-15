@@ -2,6 +2,9 @@
 from function import Function
 from key_scheduler import KeyScheduler
 from mybin import Bin
+import logging
+
+log = logging.getLogger('des-sim')
 
 L, R = 0, 1
 
@@ -40,7 +43,10 @@ class Encrypter:
         self._step = None
 
     def get_key(self):
-        return self._key_scheduler.get_key()
+        log.info("Retrieving key...")
+        key = self._key_scheduler.get_key()
+        log.info("  key = {}".format(key))
+        return key
 
     def encrypt(self, plaintext: str):
         """
@@ -69,21 +75,27 @@ class Encrypter:
         # Encrypt each block
         result_ciphertext = None
         for blk in blk_lst:
+            log.debug('Encrypting block "{}" (size {} bits)'.format(blk, len(blk)))
             self._encrypt_one(blk)
             result_ciphertext = self.ciphertext if result_ciphertext is None else result_ciphertext + self.ciphertext
+            log.debug('Encrypted block: "{}" (size {} bits)'.format(result_ciphertext , len(result_ciphertext)))
 
         return str(result_ciphertext)
 
     def _encrypt_one(self, blk: Bin):
         self.plaintext = blk
 
+        log.debug('Initializing encryption machine')
         self._step = Initialize(self)
         self.run()
 
         for round_num in range(self.NUM_ROUNDS):
+            log.debug('Enter round {}...'.format(round_num + 1))
             self._step = StartRound(self)
             self.run()
+            log.debug('End round {}...'.format(round_num + 1))
 
+        log.debug('Begin end of encryption machine')
         self._step = BeginEnd(self)
         self.run()
 

@@ -4,6 +4,9 @@
 Uses Gang-of-Four State pattern to retrieve DES keys **in order**.
 """
 from mybin import Bin
+import logging
+
+log = logging.getLogger('des-sim')
 
 PC1 = [57, 49, 41, 33, 25, 17,  9,  1,
        58, 50, 42, 34, 26, 18, 10,  2,
@@ -39,6 +42,7 @@ class KeyScheduler:
 
         self._round_num = 0
 
+        log.debug('    Initialize key scheduler...')
         self._step = Initialization(self)
         self._transform()  # Run Initialization step
 
@@ -50,8 +54,10 @@ class KeyScheduler:
         return self._round_num
 
     def get_key(self):
+        log.debug('    Generating next key...')
         self._step = TransformStart(self)
         self._transform()
+        log.debug('        Key = {}'.format(self.key))
         return self.key
 
     def next_round(self):
@@ -84,13 +90,20 @@ class Initialization(RoundStep):
         for new_bit_loc in range(self.KEY_OUTPUT_LEN):
             old_bit_loc = PC1[new_bit_loc]
             s += str(self._scheduler.key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
+
+        log.debug('    Permuted key: {}'.format(s))
+
         self._scheduler.C, self._scheduler.D = Bin(self.KEY_OUTPUT_LEN, s, 2).split(2)
+
+        log.debug('    Split C: {}'.format(self._scheduler.C))
+        log.debug('    Split D: {}'.format(self._scheduler.D))
 
         return None
 
 
 class TransformStart(RoundStep):
     def run(self):
+        self._scheduler.next_round()
         return Rotate(self._scheduler)
 
 
@@ -99,12 +112,15 @@ class Rotate(RoundStep):
         assert isinstance(self._scheduler.C, Bin)
         assert isinstance(self._scheduler.D, Bin)
 
-        self._scheduler.next_round()
-
         shift = 1 if self._scheduler.round in SINGLE_BIT_SHIFT_ROUNDS else 2
 
-        self._scheduler.C << shift
-        self._scheduler.D << shift
+        log.debug('    Left shift by {} bits'.format(shift))
+
+        self._scheduler.C <<= shift
+        self._scheduler.D <<= shift
+
+        log.debug('        Shifted C: {}'.format(self._scheduler.C))
+        log.debug('        Shifted D: {}'.format(self._scheduler.D))
 
         return Permute(self._scheduler)
 
@@ -118,10 +134,15 @@ class Permute(RoundStep):
 
         key = self._scheduler.C + self._scheduler.D
 
+        log.debug('    Combine C+D into: {}'.format(key))
+
         s = ''
         for new_bit_loc in range(self.KEY_OUTPUT_LEN):
             old_bit_loc = PC2[new_bit_loc]
-            s += str(self._scheduler.key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
+            s += str(key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
+        key = Bin(self.KEY_OUTPUT_LEN, s)
+
+        log.debug('    Permuted key: {}'.format(key))
 
         self._scheduler.key = key
 
