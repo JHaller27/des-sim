@@ -1,9 +1,14 @@
 # Author: James Haller
 from typing import Union
+import logging
+
+log = logging.getLogger('des-sim')
 
 
 class Bin:
     __slots__ = ['_val', '_num_digits']
+
+    INF = -1
 
     def copy(self):
         return Bin(self._num_digits, self._val)
@@ -40,7 +45,7 @@ class Bin:
         offset = len(self) // num
         return [Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num)]
 
-    def __init__(self, num_digits: Union[int, 'Bin'], val: Union[int, str]=0, base: int=2):
+    def __init__(self, num_digits: Union[int, 'Bin'], val: Union[int, str]=0, base: int=None):
         if isinstance(num_digits, Bin):
             self._num_digits = num_digits._num_digits
             self._val = num_digits._val
@@ -48,12 +53,28 @@ class Bin:
             self._num_digits = int(num_digits)
 
             if isinstance(val, str):
+                val = val.lower()
+                if base is None:
+                    if val.startswith('0x'):
+                        base = 16
+                        val = val[2:]
+                    elif val.startswith('0o'):
+                        base = 8
+                        val = val[2:]
+                    elif val.startswith('0b'):
+                        base = 2
+                        val = val[2:]
+                    else:
+                        base = 10
+                log.debug('        Bin "{}" base = {}'.format(val, base))
                 self._val = int(val, base)
             else:
                 self._val = int(val)
 
-            if not 1 <= self._num_digits <= len(str(self)):
-                raise ValueError('number of digits must be between 1 and the number of binary digits in val')
+            if self._num_digits == self.INF:
+                self._num_digits = len('{:b}'.format(self._val))
+            if not 1 <= self._num_digits:
+                raise ValueError('number of digits must be greater than or equal to 1')
 
     def __add__(self, other: 'Bin'):
         """

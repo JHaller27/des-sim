@@ -57,6 +57,7 @@ class Encrypter:
         """
         from math import ceil
 
+        plaintext = Bin(Bin.INF, plaintext)
         self.ciphertext = None
 
         # Get list of blocks to encrypt
@@ -64,13 +65,13 @@ class Encrypter:
         num_blocks = ceil(len(plaintext) / self.BLOCKSIZE)
 
         for i in range(num_blocks):
-            blk = plaintext[i * self.BLOCKSIZE:(i + 1) * self.BLOCKSIZE]
+            blk = str(plaintext)[i * self.BLOCKSIZE:(i + 1) * self.BLOCKSIZE]
 
             # Pad out to BLOCKSIZE
             while len(blk) < self.BLOCKSIZE:
                 blk += '0'
 
-            blk_lst.append(Bin(self.BLOCKSIZE, blk, 2))
+            blk_lst.append(Bin(self.BLOCKSIZE, blk))
 
         # Encrypt each block
         result_ciphertext = None

@@ -11,10 +11,12 @@ log.addHandler(hand)
 
 def main():
     key = input('key > ')
+    ks = KeyScheduler(key)
+
     plaintext = input('pt  > ')
     print()
 
-    encrypter = Encrypter(KeyScheduler(key))
+    encrypter = Encrypter(ks)
     ciphertext = encrypter.encrypt(plaintext)
 
     print(ciphertext)
