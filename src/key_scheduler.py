@@ -45,9 +45,9 @@ class KeyScheduler:
         self._step = Initialization(self)
         self._transform()  # Run Initialization step
 
-        log.info('            key C_{} = {} ({} bits)\n'
-                 '                D_{} = {} ({} bits)'.format(self._round_num, self.C, len(self.C),
-                                                              self._round_num, self.D, len(self.D)))
+        log.debug('            key C_{} = {} ({} bits)\n'
+                  '                D_{} = {} ({} bits)'.format(self._round_num, self.C, len(self.C),
+                                                               self._round_num, self.D, len(self.D)))
 
     def _transform(self):
         while self._step is not None:
@@ -59,10 +59,10 @@ class KeyScheduler:
     def get_key(self):
         self._step = TransformStart(self)
         self._transform()
-        log.info('            key C_{} = {} ({} bits)\n'
-                 '                D_{} = {} ({} bits)'.format(self._round_num, self.C, len(self.C),
-                                                              self._round_num, self.D, len(self.D)))
-        log.info('            PC-2 result  {} ({} bits)'.format(self.key, len(self.key)))
+        log.debug('            key C_{} = {} ({} bits)\n'
+                  '                D_{} = {} ({} bits)'.format(self._round_num, self.C, len(self.C),
+                                                               self._round_num, self.D, len(self.D)))
+        log.debug('            PC-2 result  {} ({} bits)'.format(self.key, len(self.key)))
         return self.key
 
     def next_round(self):
@@ -107,7 +107,7 @@ class Initialization(RoundStep):
 
 class TransformStart(RoundStep):
     def run(self):
-        log.info("            Generating next key...")
+        log.info("        Generating next key...")
         self._scheduler.next_round()
         return Rotate(self._scheduler)
 
@@ -119,9 +119,10 @@ class Rotate(RoundStep):
 
         shift = 1 if self._scheduler.round in SINGLE_BIT_SHIFT_ROUNDS else 2
 
-        log.debug('    Left shift by {} bits'.format(shift))
+        log.debug('            Left shift by {} bits'.format(shift))
 
         self._scheduler.C <<= shift
+        self._scheduler.D <<= shift
 
         return Permute(self._scheduler)
 

@@ -159,7 +159,7 @@ class Expansion(FunctionStep):
             old_bit_loc = E[new_bit_loc]
             s += str(self._context.data[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
         self._context.data = Bin(self.OUTPUT_LEN, s, 2)
-        log.info('        E result   {} ({} bits)'.format(self._context.data, len(self._context.data)))
+        log.debug('        E result   {} ({} bits)'.format(self._context.data, len(self._context.data)))
 
         return Xor(self._context)
 
@@ -167,7 +167,7 @@ class Expansion(FunctionStep):
 class Xor(FunctionStep):
     def run(self):
         self._context.data ^= self._context.key
-        log.info('        Xor result {} ({} bits)'.format(self._context.data, len(self._context.data)))
+        log.debug('        Xor result {} ({} bits)'.format(self._context.data, len(self._context.data)))
         return Split(self._context)
 
 
@@ -175,10 +175,10 @@ class Split(FunctionStep):
     def run(self):
         self._context.data = self._context.data.split(len(S_BOXES))
 
-        log.info('        Split for S boxes:')
+        log.debug('        Split for S boxes:')
         i = 1
         for s_in in self._context.data:
-            log.info('            [{}] {} ({} bits)'.format(i, s_in, len(s_in)))
+            log.debug('            [{}] {} ({} bits)'.format(i, s_in, len(s_in)))
             i += 1
 
         return SBoxes(self._context)
@@ -188,7 +188,7 @@ class SBoxes(FunctionStep):
     OUTPUT_LEN = 4
 
     def run(self):
-        log.info('        S box results:')
+        log.debug('        S box results:')
 
         data_lst = self._context.data
         for s_box_idx in range(len(S_BOXES)):
@@ -201,7 +201,7 @@ class SBoxes(FunctionStep):
             b = Bin(self.OUTPUT_LEN, s_box[row_idx][col_idx])
             data_lst[s_box_idx] = b
 
-            log.info('            [{}] {} ({} bits)'.format(s_box_idx + 1, b, len(b)))
+            log.debug('            [{}] {} ({} bits)'.format(s_box_idx + 1, b, len(b)))
 
         self._context.data = tuple(data_lst)
 
@@ -215,7 +215,7 @@ class Recombine(FunctionStep):
             new_data = b if new_data is None else new_data + b
         self._context.data = new_data
 
-        log.info('        S box result {} ({} bits)'.format(self._context.data, len(self._context.data)))
+        log.debug('        S box result {} ({} bits)'.format(self._context.data, len(self._context.data)))
 
         return Permutation(self._context)
 
@@ -230,7 +230,7 @@ class Permutation(FunctionStep):
             s += self._context.data[old_bit_loc - 1]  # Must subtract 1 b/c PC tables are 1-indexed
         self._context.data = Bin(self.OUTPUT_LEN, s, 2)
 
-        log.info('        P result {} ({} bits)'.format(self._context.data, len(self._context.data)))
+        log.debug('        P result {} ({} bits)'.format(self._context.data, len(self._context.data)))
 
         return None
 
