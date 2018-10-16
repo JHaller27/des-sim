@@ -57,7 +57,7 @@ class KeyScheduler:
         log.info('    Generating next key...')
         self._step = TransformStart(self)
         self._transform()
-        log.info('        Key = {}'.format(self.key))
+        log.debug('        Key = {}'.format(self.key))
         return self.key
 
     def next_round(self):

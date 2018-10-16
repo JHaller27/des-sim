@@ -78,10 +78,10 @@ class Encrypter:
         # Encrypt each block
         result_ciphertext = None
         for blk in blk_lst:
-            log.info('Encrypting block "{}" (size {} bits)'.format(blk, len(blk)))
+            log.info('Encrypting block {} ({} bits)'.format(blk, len(blk)))
             self._encrypt_one(blk)
             result_ciphertext = self.ciphertext if result_ciphertext is None else result_ciphertext + self.ciphertext
-            log.info('Encrypted block: "{}" (size {} bits)'.format(result_ciphertext , len(result_ciphertext)))
+            log.info('Encrypted block: {} ({} bits)'.format(result_ciphertext , len(result_ciphertext)))
 
         return str(result_ciphertext)
 
@@ -97,6 +97,8 @@ class Encrypter:
             self._step = StartRound(self)
             self.run()
             log.info('End round {}...'.format(round_num + 1))
+            tmp = self.plaintext[0] + self.plaintext[1]
+            log.info('    Result: {} ({} bits)'.format(tmp, len(tmp)))
 
         log.info('Begin end of encryption machine')
         self._step = BeginEnd(self)
