@@ -4,8 +4,9 @@ Python DES simulation
 ## Cool features
 
 * Copiously uses GoF State pattern!
-* Easy debug output (see top of `src/des-sim.py`).
+* Easy debug output to see how the DES state machine works!
 * Very few "distracting" comments!
+* Uses python's argparser!
 
 ## Usage
 
