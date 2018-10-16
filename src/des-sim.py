@@ -1,4 +1,6 @@
 # Author: James Haller
+import sys
+
 from encrypter import Encrypter
 from key_scheduler import KeyScheduler
 
@@ -6,7 +8,7 @@ import logging
 
 log = logging.getLogger('des-sim')
 log.setLevel(logging.INFO)  # NOTSET, DEBUG, INFO
-hand = logging.StreamHandler()
+hand = logging.StreamHandler(sys.stdout)
 log.addHandler(hand)
 
 
@@ -15,7 +17,6 @@ def main():
     ks = KeyScheduler(key)
 
     plaintext = input('pt  > ')
-    print()
 
     encrypter = Encrypter(ks)
     ciphertext = encrypter.encrypt(plaintext)

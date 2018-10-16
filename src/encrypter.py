@@ -44,7 +44,7 @@ class Encrypter:
         self._step = None
 
     def get_key(self):
-        log.info("Retrieving key...")
+        log.debug("Retrieving key...")
         key = self._key_scheduler.get_key()
         log.info("    key = {} ({} bits)".format(key, len(key)))
         return key
@@ -78,7 +78,7 @@ class Encrypter:
         # Encrypt each block
         result_ciphertext = None
         for blk in blk_lst:
-            log.info('Encrypting block {} ({} bits)'.format(blk, len(blk)))
+            log.info('\nEncrypting block {} ({} bits)'.format(blk, len(blk)))
             self._encrypt_one(blk)
             result_ciphertext = self.ciphertext if result_ciphertext is None else result_ciphertext + self.ciphertext
             log.info('Encrypted block: {} ({} bits)'.format(result_ciphertext , len(result_ciphertext)))
@@ -88,17 +88,21 @@ class Encrypter:
     def _encrypt_one(self, blk: Bin):
         self.plaintext = blk
 
-        log.info('Initializing encryption machine')
         self._step = Initialize(self)
         self.run()
+        tmp = self.plaintext[0] + self.plaintext[1]
+        log.info('    Result: L = {} ({} bits)\n'
+                 '            R = {} ({} bits)'.format(self.plaintext[0], len(self.plaintext[0]),
+                                                                    self.plaintext[1], len(self.plaintext[1])))
 
         for round_num in range(self.NUM_ROUNDS):
             log.info('Enter round {}...'.format(round_num + 1))
             self._step = StartRound(self)
             self.run()
-            log.info('End round {}...'.format(round_num + 1))
-            tmp = self.plaintext[0] + self.plaintext[1]
-            log.info('    Result: {} ({} bits)'.format(tmp, len(tmp)))
+            log.debug('End round {}...'.format(round_num + 1))
+            log.info('    Result L = {} ({} bits)\n'
+                     '           R = {} ({} bits)'.format(self.plaintext[0], len(self.plaintext[0]),
+                                                                        self.plaintext[1], len(self.plaintext[1])))
 
         log.info('Begin end of encryption machine')
         self._step = BeginEnd(self)
@@ -127,6 +131,7 @@ class RoundStep:
 
 class Initialize(RoundStep):
     def run(self):
+        log.info('Initializing encryption machine')
         return InitialPermutation(self._encrypter)
 
 
@@ -154,6 +159,7 @@ class StartRound(RoundStep):
 class Xor(RoundStep):
     def run(self):
         f_result = self._encrypter.f.get_result()
+        log.info('    f output = {} ({} bits)'.format(f_result, len(f_result)))
         self._encrypter.plaintext[L] ^= f_result
         return SwapSides(self._encrypter)
 

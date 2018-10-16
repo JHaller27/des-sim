@@ -54,7 +54,7 @@ class KeyScheduler:
         return self._round_num
 
     def get_key(self):
-        log.info('    Generating next key...')
+        log.debug('    Generating next key...')
         self._step = TransformStart(self)
         self._transform()
         log.debug('        Key = {}'.format(self.key))
