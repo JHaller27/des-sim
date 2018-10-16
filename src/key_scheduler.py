@@ -140,7 +140,7 @@ class Permute(RoundStep):
         for new_bit_loc in range(self.KEY_OUTPUT_LEN):
             old_bit_loc = PC2[new_bit_loc]
             s += str(key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
-        key = Bin(self.KEY_OUTPUT_LEN, s)
+        key = Bin(self.KEY_OUTPUT_LEN, s, 2)
 
         log.debug('    Permuted key: {}'.format(key))
 

@@ -59,21 +59,27 @@ class Bin:
                     if val.startswith('0x'):
                         base = 16
                         val = val[2:]
+                        if self._num_digits == self.INF:
+                            self._num_digits = len(val) * 4  # 1 hex digit = 4 bits
                     elif val.startswith('0o'):
                         base = 8
                         val = val[2:]
+                        if self._num_digits == self.INF:
+                            self._num_digits = len(val) * 3  # 1 hex digit = 4 bits
                     elif val.startswith('0b'):
                         base = 2
                         val = val[2:]
+                        if self._num_digits == self.INF:
+                            self._num_digits = len(val)
                     else:
                         base = 10
+                        if self._num_digits == self.INF:
+                            self._num_digits = len('{:b}'.format(val))
                 log.debug('        Bin "{}" base = {}'.format(val, base))
                 self._val = int(val, base)
             else:
                 self._val = int(val)
 
-            if self._num_digits == self.INF:
-                self._num_digits = len('{:b}'.format(self._val))
             if not 1 <= self._num_digits:
                 raise ValueError('number of digits must be greater than or equal to 1')
 

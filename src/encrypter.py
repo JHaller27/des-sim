@@ -71,6 +71,7 @@ class Encrypter:
             # Pad out to BLOCKSIZE
             while len(blk) < self.BLOCKSIZE:
                 blk += '0'
+            blk = '0b' + blk
 
             blk_lst.append(Bin(self.BLOCKSIZE, blk))
 
