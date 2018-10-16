@@ -42,9 +42,12 @@ class KeyScheduler:
 
         self._round_num = 0
 
-        log.info('    Initialize key scheduler...')
         self._step = Initialization(self)
         self._transform()  # Run Initialization step
+
+        log.info('            key C_{} = {} ({} bits)\n'
+                 '                D_{} = {} ({} bits)'.format(self._round_num, self.C, len(self.C),
+                                                              self._round_num, self.D, len(self.D)))
 
     def _transform(self):
         while self._step is not None:
@@ -54,10 +57,12 @@ class KeyScheduler:
         return self._round_num
 
     def get_key(self):
-        log.debug('    Generating next key...')
         self._step = TransformStart(self)
         self._transform()
-        log.debug('        Key = {}'.format(self.key))
+        log.info('            key C_{} = {} ({} bits)\n'
+                 '                D_{} = {} ({} bits)'.format(self._round_num, self.C, len(self.C),
+                                                              self._round_num, self.D, len(self.D)))
+        log.info('            PC-2 result  {} ({} bits)'.format(self.key, len(self.key)))
         return self.key
 
     def next_round(self):
@@ -86,23 +91,23 @@ class Initialization(RoundStep):
     KEY_OUTPUT_LEN = 56
 
     def run(self):
+        log.info('        Initialize key scheduler...')
+        log.info('            original key {} ({} bits)'.format(self._scheduler.key, len(self._scheduler.key)))
         s = ''
         for new_bit_loc in range(self.KEY_OUTPUT_LEN):
             old_bit_loc = PC1[new_bit_loc]
             s += str(self._scheduler.key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
 
-        log.debug('    Permuted key: {}'.format(s))
+        log.info('            PC-1 result  {} ({} bits)'.format(s, len(s)))
 
         self._scheduler.C, self._scheduler.D = Bin(self.KEY_OUTPUT_LEN, s, 2).split(2)
-
-        log.debug('    Split C: {}'.format(self._scheduler.C))
-        log.debug('    Split D: {}'.format(self._scheduler.D))
 
         return None
 
 
 class TransformStart(RoundStep):
     def run(self):
+        log.info("            Generating next key...")
         self._scheduler.next_round()
         return Rotate(self._scheduler)
 
@@ -117,10 +122,6 @@ class Rotate(RoundStep):
         log.debug('    Left shift by {} bits'.format(shift))
 
         self._scheduler.C <<= shift
-        self._scheduler.D <<= shift
-
-        log.debug('        Shifted C: {}'.format(self._scheduler.C))
-        log.debug('        Shifted D: {}'.format(self._scheduler.D))
 
         return Permute(self._scheduler)
 
@@ -134,15 +135,11 @@ class Permute(RoundStep):
 
         key = self._scheduler.C + self._scheduler.D
 
-        log.debug('    Combine C+D into: {}'.format(key))
-
         s = ''
         for new_bit_loc in range(self.KEY_OUTPUT_LEN):
             old_bit_loc = PC2[new_bit_loc]
             s += str(key[old_bit_loc - 1])  # Must subtract 1 b/c PC tables are 1-indexed
         key = Bin(self.KEY_OUTPUT_LEN, s, 2)
-
-        log.debug('    Permuted key: {}'.format(key))
 
         self._scheduler.key = key
 

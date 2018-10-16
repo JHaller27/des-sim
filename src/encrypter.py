@@ -44,9 +44,7 @@ class Encrypter:
         self._step = None
 
     def get_key(self):
-        log.debug("Retrieving key...")
         key = self._key_scheduler.get_key()
-        log.info("    key = {} ({} bits)".format(key, len(key)))
         return key
 
     def encrypt(self, plaintext: Union[Bin, str]):
@@ -90,21 +88,18 @@ class Encrypter:
 
         self._step = Initialize(self)
         self.run()
-        tmp = self.plaintext[0] + self.plaintext[1]
         log.info('    Result: L = {} ({} bits)\n'
                  '            R = {} ({} bits)'.format(self.plaintext[0], len(self.plaintext[0]),
-                                                                    self.plaintext[1], len(self.plaintext[1])))
+                                                       self.plaintext[1], len(self.plaintext[1])))
 
         for round_num in range(self.NUM_ROUNDS):
             log.info('Enter round {}...'.format(round_num + 1))
             self._step = StartRound(self)
             self.run()
-            log.debug('End round {}...'.format(round_num + 1))
-            log.info('    Result L = {} ({} bits)\n'
-                     '           R = {} ({} bits)'.format(self.plaintext[0], len(self.plaintext[0]),
-                                                                        self.plaintext[1], len(self.plaintext[1])))
+            log.info('    Result L_{} = {} ({} bits)\n'
+                     '           R_{} = {} ({} bits)'.format(round_num, self.plaintext[L], len(self.plaintext[L]),
+                                                             round_num, self.plaintext[R], len(self.plaintext[R])))
 
-        log.info('Begin end of encryption machine')
         self._step = BeginEnd(self)
         self.run()
 
@@ -161,6 +156,7 @@ class Xor(RoundStep):
         f_result = self._encrypter.f.get_result()
         log.info('    f output = {} ({} bits)'.format(f_result, len(f_result)))
         self._encrypter.plaintext[L] ^= f_result
+        log.info('    f output = {} ({} bits)'.format(f_result, len(f_result)))
         return SwapSides(self._encrypter)
 
 
@@ -176,6 +172,7 @@ class SwapSides(RoundStep):
 
 class BeginEnd(RoundStep):
     def run(self):
+        log.info('Begin end of encryption machine...')
         return LastSwap(self._encrypter)
 
 
