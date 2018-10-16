@@ -1,4 +1,5 @@
 # Author: James Haller
+
 from mybin import Bin
 import logging
 
@@ -92,13 +93,14 @@ class Function:
     GoF Context class
     """
 
-    __slots__ = ['_encrypter', '_step', 'data', '_key']
+    __slots__ = ['_encrypter', '_step', 'data', '_key', '_key_scheduler']
 
-    def __init__(self, encrypter: 'Encrypter'):
+    def __init__(self, encrypter: 'Encrypter', key_scheduler: 'KeyScheduler'):
         self._encrypter = encrypter
         self._step = None
         self.data = None
         self._key = None
+        self._key_scheduler = key_scheduler
 
     def get_result(self):
         self._step = Initialize(self)
@@ -112,7 +114,9 @@ class Function:
         self.data = self._encrypter.plaintext[1]
 
     def set_new_key(self):
-        self._key = self._encrypter.get_key()
+        key = self._key_scheduler.get_key()
+        log.info('        key output {} ({} bits)'.format(key, len(key)))
+        self._key = key
 
     def _get_data(self):
         return self.data

@@ -31,7 +31,7 @@ IP_INV = \
 
 
 class Encrypter:
-    __slots__ = ['plaintext', 'ciphertext', 'f', '_key_scheduler', '_step']
+    __slots__ = ['plaintext', 'ciphertext', 'f', '_step']
 
     BLOCKSIZE = 64
     NUM_ROUNDS = 16
@@ -39,14 +39,8 @@ class Encrypter:
     def __init__(self, key_scheduler: KeyScheduler):
         self.plaintext = None
         self.ciphertext = None
-        self.f = Function(self)
-        self._key_scheduler = key_scheduler
+        self.f = Function(self, key_scheduler)
         self._step = None
-
-    def get_key(self):
-        key = self._key_scheduler.get_key()
-        log.info('        key output {} ({} bits)'.format(key, len(key)))
-        return key
 
     def encrypt(self, plaintext: Union[Bin, str]):
         """
