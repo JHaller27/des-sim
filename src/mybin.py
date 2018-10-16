@@ -86,6 +86,9 @@ class Bin:
         """
         return Bin(len(self) + len(other), str(self) + str(other), 2)
 
+    def __eq__(self, other):
+        return isinstance(other, Bin) and self._val == other._val
+
     def __xor__(self, other):
         if isinstance(other, Bin):
             return Bin(self._num_digits, self._val.__xor__(Bin(other)._val))
