@@ -74,7 +74,7 @@ class Bin:
                     else:
                         base = 10
                         if self._num_digits == self.INF:
-                            self._num_digits = len('{:b}'.format(val))
+                            self._num_digits = len('{:b}'.format(int(val)))
                 log.debug('        Bin "{}" base = {}'.format(val, base))
                 self._val = int(val, base)
             else:
