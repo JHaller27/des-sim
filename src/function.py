@@ -188,13 +188,7 @@ class SBoxes(FunctionStep):
 
         data_lst = self._context.data
         for s_box_idx in range(len(S_BOXES)):
-            s_box = S_BOXES[s_box_idx]
-            data = data_lst[s_box_idx]
-
-            row_idx = int(data[0] + data[len(data) - 1], 2)
-            col_idx = int(data[1:len(data) - 1], 2)
-
-            b = Bin(self.OUTPUT_LEN, s_box[row_idx][col_idx])
+            b = self.s_box_transformation(s_box_idx, data_lst[s_box_idx])
             data_lst[s_box_idx] = b
 
             log.debug('            [{}] {} ({} bits)'.format(s_box_idx + 1, b, len(b)))
@@ -202,6 +196,15 @@ class SBoxes(FunctionStep):
         self._context.data = tuple(data_lst)
 
         return Recombine(self._context)
+    
+    @staticmethod
+    def s_box_transformation(s_box_idx: int, data: Bin) -> Bin:
+            s_box = S_BOXES[s_box_idx]
+
+            row_idx = int(data[0] + data[len(data) - 1], 2)
+            col_idx = int(data[1:len(data) - 1], 2)
+
+            return Bin(SBoxes.OUTPUT_LEN, s_box[row_idx][col_idx])
 
 
 class Recombine(FunctionStep):
