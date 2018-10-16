@@ -43,6 +43,7 @@ class Bin:
 
         num_str = str(self)
         offset = len(self) // num
+        log.debug('        Splitting {} into {} chunks...'.format(str(self), num))
         return [Bin(offset, num_str[i * offset:(i + 1) * offset], 2) for i in range(num)]
 
     def __init__(self, num_digits: Union[int, 'Bin'], val: Union[int, str]=0, base: int=None):
@@ -75,6 +76,8 @@ class Bin:
                 self._num_digits = len('{:b}'.format(self._val))
             if not 1 <= self._num_digits:
                 raise ValueError('number of digits must be greater than or equal to 1')
+
+            log.debug('            Created new Bin: {}'.format(str(self)))
 
     def __add__(self, other: 'Bin'):
         """

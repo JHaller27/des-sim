@@ -42,7 +42,7 @@ class KeyScheduler:
 
         self._round_num = 0
 
-        log.debug('    Initialize key scheduler...')
+        log.info('    Initialize key scheduler...')
         self._step = Initialization(self)
         self._transform()  # Run Initialization step
 
@@ -54,10 +54,10 @@ class KeyScheduler:
         return self._round_num
 
     def get_key(self):
-        log.debug('    Generating next key...')
+        log.info('    Generating next key...')
         self._step = TransformStart(self)
         self._transform()
-        log.debug('        Key = {}'.format(self.key))
+        log.info('        Key = {}'.format(self.key))
         return self.key
 
     def next_round(self):

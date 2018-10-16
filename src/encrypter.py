@@ -1,6 +1,7 @@
 # Author: James Haller
 from function import Function
 from key_scheduler import KeyScheduler
+from typing import Union
 from mybin import Bin
 import logging
 
@@ -45,19 +46,19 @@ class Encrypter:
     def get_key(self):
         log.info("Retrieving key...")
         key = self._key_scheduler.get_key()
-        log.info("  key = {}".format(key))
+        log.info("    key = {} ({} bits)".format(key, len(key)))
         return key
 
-    def encrypt(self, plaintext: str):
+    def encrypt(self, plaintext: Union[Bin, str]):
         """
         Encrypt a binary plaintext using DES
         :param plaintext: String representation of a binary message
-            (format: no leading '0b', all digits/characters must be in base 2)
         :return: Encrypted message, ie the ciphertext
         """
         from math import ceil
 
-        plaintext = Bin(Bin.INF, plaintext)
+        if isinstance(plaintext, str):
+            plaintext = Bin(Bin.INF, plaintext)
         self.ciphertext = None
 
         # Get list of blocks to encrypt
@@ -76,27 +77,27 @@ class Encrypter:
         # Encrypt each block
         result_ciphertext = None
         for blk in blk_lst:
-            log.debug('Encrypting block "{}" (size {} bits)'.format(blk, len(blk)))
+            log.info('Encrypting block "{}" (size {} bits)'.format(blk, len(blk)))
             self._encrypt_one(blk)
             result_ciphertext = self.ciphertext if result_ciphertext is None else result_ciphertext + self.ciphertext
-            log.debug('Encrypted block: "{}" (size {} bits)'.format(result_ciphertext , len(result_ciphertext)))
+            log.info('Encrypted block: "{}" (size {} bits)'.format(result_ciphertext , len(result_ciphertext)))
 
         return str(result_ciphertext)
 
     def _encrypt_one(self, blk: Bin):
         self.plaintext = blk
 
-        log.debug('Initializing encryption machine')
+        log.info('Initializing encryption machine')
         self._step = Initialize(self)
         self.run()
 
         for round_num in range(self.NUM_ROUNDS):
-            log.debug('Enter round {}...'.format(round_num + 1))
+            log.info('Enter round {}...'.format(round_num + 1))
             self._step = StartRound(self)
             self.run()
-            log.debug('End round {}...'.format(round_num + 1))
+            log.info('End round {}...'.format(round_num + 1))
 
-        log.debug('Begin end of encryption machine')
+        log.info('Begin end of encryption machine')
         self._step = BeginEnd(self)
         self.run()
 
