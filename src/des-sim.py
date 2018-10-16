@@ -9,6 +9,7 @@ log.setLevel(logging.INFO)  # NOTSET, DEBUG, INFO
 hand = logging.StreamHandler()
 log.addHandler(hand)
 
+
 def main():
     key = input('key > ')
     ks = KeyScheduler(key)
