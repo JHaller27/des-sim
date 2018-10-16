@@ -5,7 +5,7 @@ from key_scheduler import KeyScheduler
 import logging
 
 log = logging.getLogger('des-sim')
-log.setLevel(logging.DEBUG)  # NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+log.setLevel(logging.NOTSET)  # NOTSET, DEBUG, INFO
 hand = logging.StreamHandler()
 log.addHandler(hand)
 
