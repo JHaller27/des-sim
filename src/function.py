@@ -93,13 +93,12 @@ class Function:
     GoF Context class
     """
 
-    __slots__ = ['_encrypter', '_step', 'data', '_key', '_key_scheduler']
+    __slots__ = ['_encrypter', '_step', 'data', '_key_scheduler']
 
     def __init__(self, encrypter: 'Encrypter', key_scheduler: 'KeyScheduler'):
         self._encrypter = encrypter
         self._step = None
         self.data = None
-        self._key = None
         self._key_scheduler = key_scheduler
 
     def get_result(self):
@@ -113,16 +112,10 @@ class Function:
     def set_new_data(self):
         self.data = self._encrypter.plaintext[1]
 
-    def set_new_key(self):
+    def _get_key(self):
         key = self._key_scheduler.get_key()
         log.info('        key output {} ({} bits)'.format(key, len(key)))
-        self._key = key
-
-    def _get_data(self):
-        return self.data
-
-    def _get_key(self):
-        return self._key
+        return key
 
     key = property(fget=_get_key)
 
@@ -150,7 +143,6 @@ class Initialize(FunctionStep):
     def run(self):
         log.info('    Starting f function...')
         self._context.set_new_data()
-        self._context.set_new_key()
         return Expansion(self._context)
 
 
